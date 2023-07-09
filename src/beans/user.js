@@ -1,15 +1,15 @@
 const {DataTypes} = require("sequelize");
 module.exports = {
-    id: {
+    userId: {
         type: DataTypes.INTEGER,
-        unique: true,
         primaryKey: true,
         autoIncrement: true
     },
-    firebaseUID: {  // Firebase UID
+    firebaseUID: {
+        // Firebase UID
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
+        unique: true,
     },
     firstName: {
         type: DataTypes.STRING,

@@ -20,19 +20,19 @@ for (let modelDefiner of modelDefiners) {
 
 const {conversation, message, participant, user} = sequelize.models;
 
-conversation.belongsToMany(user, { through: participant });
-conversation.hasMany(participant);
-conversation.hasMany(message);
-
-user.belongsToMany(conversation, { through: participant });
+user.hasMany(participant, {foreignKey: 'userId'});
+participant.belongsTo(user, {foreignKey: 'userId'});
+conversation.hasMany(participant, {foreignKey: 'conversationId'});
+conversation.hasMany(message, {foreignKey: 'conversationId'});
+conversation.belongsToMany(user, {through: participant, foreignKey: 'conversationId'});
+user.belongsToMany(conversation, {through: participant, foreignKey: 'userId'});
+participant.belongsTo(conversation, {foreignKey: 'conversationId'});
 
 message.belongsTo(conversation);
 
-participant.belongsTo(conversation);
-participant.belongsTo(user);
-
 sequelize.sync({
-  // alter: true
+  // alter: true,
+  // force: true,
 }).then(r => {
   console.log('Database & tables synced!');
 })

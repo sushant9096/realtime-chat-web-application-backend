@@ -1,7 +1,7 @@
 const {catchAsync} = require("../utils");
 const {conversationDAO, userDAO} = require('../dao');
 const {participantDAO} = require('../dao');
-const {sequelize, participantModel, userModel} = require("../models");
+const {sequelize, participantModel, userModel, conversationModel} = require("../models");
 const {Op} = require("sequelize");
 
 // create a new conversation from conversionDAO
@@ -24,25 +24,37 @@ const createConversation = catchAsync(async (req, res) => {
   }
 
   if (type === 0) {
+    // find all participants
+    const prtFilter = {}
+    const participantsdata = await participantDAO.findAllParticipants(prtFilter);
+    console.log('participants: ', JSON.stringify(participantsdata, null, 2))
     // find conversation with the same participants
+    console.log('participantsUserIds: ', participants)
     const filter = {
       where: {
         type: 0,
       },
-      include: [{
-        model: participantModel,
-        where: {
-          userId: {
-            [Op.in]: participants
-          }
+      include: [
+        {
+          model: participantModel,
+          // include: [userModel],
+          where: {
+            userID: {
+              [Op.in]: participants
+            }
+          },
+          attributes: []
         },
-        having: sequelize.literal(`COUNT(*) = ${participants.length}`)
-      }]
+      ],
+      group: ['conversationId'],
+      having: sequelize.literal(`COUNT(DISTINCT participants.participantId) = ${participants.length}`),
     }
     const dupConversation = await conversationDAO.findAllConversations(filter);
+    console.log('dupConversation: ', JSON.stringify(dupConversation, null, 2))
     if (dupConversation.length > 0) {
       return res.status(400).send('Conversation already exists');
     }
+    // return res.status(400).send('Conversation does not exist');
   }
 
   let conversation;
@@ -56,7 +68,7 @@ const createConversation = catchAsync(async (req, res) => {
       if (!user)
         throw new Error('User not found');
       await participantDAO.createParticipant({
-        conversationId: conversation.id,
+        conversationId: conversation.conversationId,
         userId: participants[i]
       }, {transaction: t});
     }
@@ -69,20 +81,28 @@ const createConversation = catchAsync(async (req, res) => {
 const findAllConversations = catchAsync(async (req, res) => {
     const conversations = await conversationDAO.findAllConversations({
       include: [
-        {
-          model: userModel,
-        },
+        userModel,
         {
           model: participantModel,
-          where: {
-            userId: req?.user?.id
-          },
-          attributes: []
+          attributes: [],
+          include: [
+            {
+              model: userModel,
+              where: {
+                userId: req?.user?.userId
+              },
+              right: true
+            }
+          ],
+          right: true
         }
       ],
+      // group: ['conversationId'],
+      // having: sequelize.literal(`COUNT(DISTINCT conversationId) = 2`),
     });
-    console.log('user: ', req?.user?.id)
+    console.log('user: ', req?.user?.userId)
     console.log('conversations: ', JSON.stringify(conversations, null, 2));
+    console.log('conversations: ', conversations.length)
     res.status(200).send(conversations);
   }
 );

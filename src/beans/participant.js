@@ -1,8 +1,7 @@
 const {DataTypes} = require('sequelize');
 module.exports = {
-    id: {
+    participantId: {
         type: DataTypes.INTEGER,
-        unique: true,
         primaryKey: true,
         autoIncrement: true
     },

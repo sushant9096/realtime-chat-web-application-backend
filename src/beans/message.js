@@ -1,7 +1,7 @@
 const {DataTypes} = require('sequelize');
 
 module.exports = {
-    id: {
+    messageId: {
         type: DataTypes.INTEGER,
         unique: true,
         primaryKey: true,
