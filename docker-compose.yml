@@ -24,7 +24,5 @@ services:
       DB_NAME: ${DB_NAME}
     ports:
       - "3000:3000"
-    volumes:
-      - ./:/app
     depends_on:
       - database

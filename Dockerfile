@@ -2,4 +2,4 @@ FROM node:16
 COPY . /app
 WORKDIR /app
 RUN npm ci
-CMD ["npm", "start"]
+CMD ["/bin/bash", "-c", "ls && npm run start"]
