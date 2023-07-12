@@ -24,10 +24,6 @@ const createConversation = catchAsync(async (req, res) => {
   }
 
   if (type === 0) {
-    // find all participants
-    const prtFilter = {}
-    const participantsdata = await participantDAO.findAllParticipants(prtFilter);
-    console.log('participants: ', JSON.stringify(participantsdata, null, 2))
     // find conversation with the same participants
     console.log('participantsUserIds: ', participants)
     const filter = {
@@ -50,7 +46,7 @@ const createConversation = catchAsync(async (req, res) => {
       having: sequelize.literal(`COUNT(DISTINCT participants.participantId) = ${participants.length}`),
     }
     const dupConversation = await conversationDAO.findAllConversations(filter);
-    console.log('dupConversation: ', JSON.stringify(dupConversation, null, 2))
+    // console.log('dupConversation: ', JSON.stringify(dupConversation, null, 2))
     if (dupConversation.length > 0) {
       return res.status(400).send('Conversation already exists');
     }
@@ -100,9 +96,9 @@ const findAllConversations = catchAsync(async (req, res) => {
       // group: ['conversationId'],
       // having: sequelize.literal(`COUNT(DISTINCT conversationId) = 2`),
     });
-    console.log('user: ', req?.user?.userId)
-    console.log('conversations: ', JSON.stringify(conversations, null, 2));
-    console.log('conversations: ', conversations.length)
+    // console.log('user: ', req?.user?.userId)
+    // console.log('conversations: ', JSON.stringify(conversations, null, 2));
+    // console.log('conversations: ', conversations.length)
     res.status(200).send(conversations);
   }
 );
