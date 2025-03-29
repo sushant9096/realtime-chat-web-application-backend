@@ -24,5 +24,7 @@ services:
       DB_NAME: ${DB_NAME}
     ports:
       - "3000:3000"
+    volumes:
+      - ./logs:/app/logs  # Add this for PM2 logs
     depends_on:
       - database
